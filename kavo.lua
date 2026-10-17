@@ -62,15 +62,6 @@ local themeStyles = {
     RJTheme8 = { SchemeColor = Color3.fromRGB(150, 72, 148), Background = Color3.fromRGB(15,15,15), Header = Color3.fromRGB(15,15,15), TextColor = Color3.fromRGB(255,255,255), ElementColor = Color3.fromRGB(20, 20, 20) }
 }
 
-local SettingsT = {}
-local Name = "KavoConfig.JSON"
-
-pcall(function()
-    if not pcall(function() readfile(Name) end) then
-        writefile(Name, game:service'HttpService':JSONEncode(SettingsT))
-    end
-end)
-
 local LibName = tostring(math.random(1, 100))..tostring(math.random(1,50))..tostring(math.random(1, 100))
 
 function Kavo:ToggleUI()
@@ -99,7 +90,7 @@ function Kavo.CreateLib(kavName, themeList)
             v:Destroy()
         end
     end
-    
+
     local ScreenGui = Instance.new("ScreenGui")
     local Main = Instance.new("Frame")
     local MainCorner = Instance.new("UICorner")
@@ -119,7 +110,7 @@ function Kavo.CreateLib(kavName, themeList)
     local infoContainer = Instance.new("Frame")
     local blurFrame = Instance.new("Frame")
 
-    -- Текст "А" для мини-квадрата
+    -- Крупная буква "А" по центру квадрата при сворачивании
     local miniText = Instance.new("TextLabel")
     miniText.Name = "MiniText"
     miniText.Parent = Main
@@ -128,7 +119,7 @@ function Kavo.CreateLib(kavName, themeList)
     miniText.Font = Enum.Font.GothamBold
     miniText.Text = "A"
     miniText.TextColor3 = themeList.TextColor
-    miniText.TextSize = 22.000
+    miniText.TextSize = 36.000
     miniText.Visible = false
 
     local activeThreads = true
@@ -155,24 +146,22 @@ function Kavo.CreateLib(kavName, themeList)
     Main.Position = UDim2.new(0.336503863, 0, 0.275485456, 0)
     Main.Size = UDim2.new(0, 525, 0, 318)
 
-    MainCorner.CornerRadius = UDim.new(0, 4)
+    MainCorner.CornerRadius = UDim.new(0, 6)
     MainCorner.Name = "MainCorner"
     MainCorner.Parent = Main
 
     MainHeader.Name = "MainHeader"
     MainHeader.Parent = Main
     MainHeader.BackgroundColor3 = themeList.Header
-    Objects[MainHeader] = "BackgroundColor3"
     MainHeader.Size = UDim2.new(0, 525, 0, 29)
     
-    headerCover.CornerRadius = UDim.new(0, 4)
+    headerCover.CornerRadius = UDim.new(0, 6)
     headerCover.Name = "headerCover"
     headerCover.Parent = MainHeader
 
     coverup.Name = "coverup"
     coverup.Parent = MainHeader
     coverup.BackgroundColor3 = themeList.Header
-    Objects[coverup] = "BackgroundColor3"
     coverup.BorderSizePixel = 0
     coverup.Position = UDim2.new(0, 0, 0.758620679, 0)
     coverup.Size = UDim2.new(0, 525, 0, 7)
@@ -189,7 +178,7 @@ function Kavo.CreateLib(kavName, themeList)
     title.TextSize = 16.000
     title.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Кнопка закрытия
+    -- Крестик (полное закрытие и выключение скрипта)
     close.Name = "close"
     close.Parent = MainHeader
     close.BackgroundTransparency = 1.000
@@ -211,7 +200,7 @@ function Kavo.CreateLib(kavName, themeList)
         ScreenGui:Destroy()
     end)
 
-    -- Кнопка сворачивания
+    -- Кнопка сворачивания в квадрат с буквой "А"
     minimize.Name = "minimize"
     minimize.Parent = MainHeader
     minimize.BackgroundTransparency = 1.000
@@ -235,11 +224,11 @@ function Kavo.CreateLib(kavName, themeList)
             pages.Visible = false
             infoContainer.Visible = false
             coverup.Visible = false
-            MainHeader.Visible = false -- Прячем шапку целиком, чтобы остался только чистый квадрат
+            MainHeader.Visible = false
             miniText.Visible = true
 
             game.TweenService:Create(Main, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 45, 0, 45)
+                Size = UDim2.new(0, 55, 0, 55)
             }):Play()
         else
             minimized = false
@@ -260,15 +249,12 @@ function Kavo.CreateLib(kavName, themeList)
 
     minimize.MouseButton1Click:Connect(toggleMinimize)
 
-    -- Делаем сам мини-квадрат с буквой А кликабельным для открытия обратно
     Main.InputBegan:Connect(function(inputObject)
         if minimized and inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
-            -- Проверяем, что не просто перетаскивали мышку, а именно кликнули
             toggleMinimize()
         end
     end)
 
-    -- Включаем перетаскивание для самого квадрата в свернутом виде
     Kavo:DraggingEnabled(Main, Main)
 
     MainSide.Name = "MainSide"
@@ -278,7 +264,6 @@ function Kavo.CreateLib(kavName, themeList)
     MainSide.Size = UDim2.new(0, 149, 0, 289)
 
     sideCorner.CornerRadius = UDim.new(0, 4)
-    sideCorner.Name = "sideCorner"
     sideCorner.Parent = MainSide
 
     coverup_2.Name = "coverup"
@@ -397,17 +382,7 @@ function Kavo.CreateLib(kavName, themeList)
         end)
 
         local Sections = {}
-        local focusing = false
-        local viewDe = false
-
-        coroutine.wrap(function()
-            while activeThreads and task.wait() do
-                page.BackgroundColor3 = themeList.Background
-                tabButton.TextColor3 = themeList.TextColor
-                tabButton.BackgroundColor3 = themeList.SchemeColor
-            end
-        end)()
-    
+        
         function Sections:NewSection(secName, hidden)
             secName = secName or "Section"
             local sectionFrame = Instance.new("Frame")
@@ -436,6 +411,7 @@ function Kavo.CreateLib(kavName, themeList)
             sectionHead.Size = UDim2.new(0, 352, 0, 33)
 
             sHeadCorner.CornerRadius = UDim.new(0, 4)
+            sHeadCorner.Name = "sHeadCorner"
             sHeadCorner.Parent = sectionHead
 
             sectionName.Name = "sectionName"
@@ -478,8 +454,8 @@ function Kavo.CreateLib(kavName, themeList)
             UpdateSize()
 
             local Elements = {}
+            
             function Elements:NewButton(bname, tipINf, callback)
-                local ButtonFunction = {}
                 tipINf = tipINf or "Tip..."
                 bname = bname or "Button"
                 callback = callback or function() end
@@ -565,41 +541,19 @@ function Kavo.CreateLib(kavName, themeList)
                 UpdateSize()
 
                 local ms = game.Players.LocalPlayer:GetMouse()
-
                 buttonElement.MouseButton1Click:Connect(function()
-                    if not focusing then
-                        callback()
-                        local c = Sample:Clone()
-                        c.Parent = buttonElement
-                        local x, y = (ms.X - c.AbsolutePosition.X), (ms.Y - c.AbsolutePosition.Y)
-                        c.Position = UDim2.new(0, x, 0, y)
-                        local size = math.max(buttonElement.AbsoluteSize.X, buttonElement.AbsoluteSize.Y) * 1.5
-                        c:TweenSizeAndPosition(UDim2.new(0, size, 0, size), UDim2.new(0.5, (-size / 2), 0.5, (-size / 2)), 'Out', 'Quad', 0.35, true)
-                        for _ = 1, 10 do
-                            c.ImageTransparency = c.ImageTransparency + 0.05
-                            task.wait(0.35 / 12)
-                        end
-                        c:Destroy()
+                    callback()
+                    local c = Sample:Clone()
+                    c.Parent = buttonElement
+                    local x, y = (ms.X - c.AbsolutePosition.X), (ms.Y - c.AbsolutePosition.Y)
+                    c.Position = UDim2.new(0, x, 0, y)
+                    local size = math.max(buttonElement.AbsoluteSize.X, buttonElement.AbsoluteSize.Y) * 1.5
+                    c:TweenSizeAndPosition(UDim2.new(0, size, 0, size), UDim2.new(0.5, (-size / 2), 0.5, (-size / 2)), 'Out', 'Quad', 0.35, true)
+                    for _ = 1, 10 do
+                        c.ImageTransparency = c.ImageTransparency + 0.05
+                        task.wait(0.35 / 12)
                     end
-                end)
-
-                viewInfo.MouseButton1Click:Connect(function()
-                    if not viewDe then
-                        viewDe = true
-                        focusing = true
-                        for _,v in next, infoContainer:GetChildren() do
-                            if v ~= moreInfo then
-                                Utility:TweenObject(v, {Position = UDim2.new(0,0,2,0)}, 0.2)
-                            end
-                        end
-                        Utility:TweenObject(moreInfo, {Position = UDim2.new(0,0,0,0)}, 0.2)
-                        Utility:TweenObject(blurFrame, {BackgroundTransparency = 0.5}, 0.2)
-                        task.wait(1.5)
-                        focusing = false
-                        Utility:TweenObject(moreInfo, {Position = UDim2.new(0,0,2,0)}, 0.2)
-                        Utility:TweenObject(blurFrame, {BackgroundTransparency = 1}, 0.2)
-                        viewDe = false
-                    end
+                    c:Destroy()
                 end)
 
                 coroutine.wrap(function()
@@ -607,18 +561,257 @@ function Kavo.CreateLib(kavName, themeList)
                         buttonElement.BackgroundColor3 = themeList.ElementColor
                         viewInfo.ImageColor3 = themeList.SchemeColor
                         Sample.ImageColor3 = themeList.SchemeColor
-                        moreInfo.BackgroundColor3 = Color3.fromRGB(themeList.SchemeColor.r * 255 - 14, themeList.SchemeColor.g * 255 - 17, themeList.SchemeColor.b * 255 - 13)
-                        moreInfo.TextColor3 = themeList.TextColor
                         touch.ImageColor3 = themeList.SchemeColor
                         btnInfo.TextColor3 = themeList.TextColor
                     end
                 end)()
-
-                function ButtonFunction:UpdateButton(newTitle)
-                    btnInfo.Text = newTitle
-                end
-                return ButtonFunction
             end
+
+            function Elements:NewToggle(tname, nTip, callback)
+                tname = tname or "Toggle"
+                nTip = nTip or "Toggle info"
+                callback = callback or function() end
+                local toggled = false
+
+                local toggleElement = Instance.new("TextButton")
+                local UICorner = Instance.new("UICorner")
+                local toggleDisabled = Instance.new("ImageLabel")
+                local toggleEnabled = Instance.new("ImageLabel")
+                local togName = Instance.new("TextLabel")
+
+                toggleElement.Name = "toggleElement"
+                toggleElement.Parent = sectionInners
+                toggleElement.BackgroundColor3 = themeList.ElementColor
+                toggleElement.Size = UDim2.new(0, 352, 0, 33)
+                toggleElement.AutoButtonColor = false
+                toggleElement.Text = ""
+
+                UICorner.CornerRadius = UDim.new(0, 4)
+                UICorner.Parent = toggleElement
+
+                toggleDisabled.Name = "toggleDisabled"
+                toggleDisabled.Parent = toggleElement
+                toggleDisabled.BackgroundTransparency = 1.000
+                toggleDisabled.Position = UDim2.new(0.02, 0, 0.18, 0)
+                toggleDisabled.Size = UDim2.new(0, 21, 0, 21)
+                toggleDisabled.Image = "rbxassetid://3926309567"
+                toggleDisabled.ImageColor3 = themeList.SchemeColor
+                toggleDisabled.ImageRectOffset = Vector2.new(628, 420)
+                toggleDisabled.ImageRectSize = Vector2.new(48, 48)
+
+                toggleEnabled.Name = "toggleEnabled"
+                toggleEnabled.Parent = toggleElement
+                toggleEnabled.BackgroundTransparency = 1.000
+                toggleEnabled.Position = UDim2.new(0.02, 0, 0.18, 0)
+                toggleEnabled.Size = UDim2.new(0, 21, 0, 21)
+                toggleEnabled.Image = "rbxassetid://3926309567"
+                toggleEnabled.ImageColor3 = themeList.SchemeColor
+                toggleEnabled.ImageRectOffset = Vector2.new(784, 420)
+                toggleEnabled.ImageRectSize = Vector2.new(48, 48)
+                toggleEnabled.ImageTransparency = 1.000
+
+                togName.Name = "togName"
+                togName.Parent = toggleElement
+                togName.BackgroundTransparency = 1.000
+                togName.Position = UDim2.new(0.0967, 0, 0.272, 0)
+                togName.Size = UDim2.new(0, 288, 0, 14)
+                togName.Font = Enum.Font.GothamSemibold
+                togName.Text = tname
+                togName.TextColor3 = themeList.TextColor
+                togName.TextSize = 14.000
+                togName.TextXAlignment = Enum.TextXAlignment.Left
+
+                updateSectionFrame()
+                UpdateSize()
+
+                toggleElement.MouseButton1Click:Connect(function()
+                    toggled = not toggled
+                    if toggled then
+                        game.TweenService:Create(toggleEnabled, TweenInfo.new(0.1), {ImageTransparency = 0}):Play()
+                    else
+                        game.TweenService:Create(toggleEnabled, TweenInfo.new(0.1), {ImageTransparency = 1}):Play()
+                    end
+                    pcall(callback, toggled)
+                end)
+
+                coroutine.wrap(function()
+                    while activeThreads and task.wait() do
+                        toggleElement.BackgroundColor3 = themeList.ElementColor
+                        toggleDisabled.ImageColor3 = themeList.SchemeColor
+                        toggleEnabled.ImageColor3 = themeList.SchemeColor
+                        togName.TextColor3 = themeList.TextColor
+                    end
+                end)()
+            end
+
+            function Elements:NewSlider(slidInf, slidTip, maxvalue, minvalue, callback)
+                slidInf = slidInf or "Slider"
+                maxvalue = maxvalue or 500
+                minvalue = minvalue or 16
+                callback = callback or function() end
+
+                local sliderElement = Instance.new("TextButton")
+                local UICorner = Instance.new("UICorner")
+                local togName = Instance.new("TextLabel")
+                local sliderBtn = Instance.new("TextButton")
+                local UICorner_2 = Instance.new("UICorner")
+                local sliderDrag = Instance.new("Frame")
+                local UICorner_3 = Instance.new("UICorner")
+                local val = Instance.new("TextLabel")
+
+                sliderElement.Name = "sliderElement"
+                sliderElement.Parent = sectionInners
+                sliderElement.BackgroundColor3 = themeList.ElementColor
+                sliderElement.Size = UDim2.new(0, 352, 0, 33)
+                sliderElement.AutoButtonColor = false
+                sliderElement.Text = ""
+
+                UICorner.CornerRadius = UDim.new(0, 4)
+                UICorner.Parent = sliderElement
+
+                togName.Name = "togName"
+                togName.Parent = sliderElement
+                togName.BackgroundTransparency = 1.000
+                togName.Position = UDim2.new(0.0967, 0, 0.272, 0)
+                togName.Size = UDim2.new(0, 138, 0, 14)
+                togName.Font = Enum.Font.GothamSemibold
+                togName.Text = slidInf
+                togName.TextColor3 = themeList.TextColor
+                togName.TextSize = 14.000
+                togName.TextXAlignment = Enum.TextXAlignment.Left
+
+                sliderBtn.Name = "sliderBtn"
+                sliderBtn.Parent = sliderElement
+                sliderBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+                sliderBtn.BorderSizePixel = 0
+                sliderBtn.Position = UDim2.new(0.488, 0, 0.393, 0)
+                sliderBtn.Size = UDim2.new(0, 149, 0, 6)
+                sliderBtn.AutoButtonColor = false
+                sliderBtn.Text = ""
+
+                UICorner_2.Parent = sliderBtn
+
+                sliderDrag.Name = "sliderDrag"
+                sliderDrag.Parent = sliderBtn
+                sliderDrag.BackgroundColor3 = themeList.SchemeColor
+                sliderDrag.BorderSizePixel = 0
+                sliderDrag.Size = UDim2.new(0, 0, 1, 0)
+
+                UICorner_3.Parent = sliderDrag
+
+                val.Name = "val"
+                val.Parent = sliderElement
+                val.BackgroundTransparency = 1.000
+                val.Position = UDim2.new(0.35, 0, 0.27, 0)
+                val.Size = UDim2.new(0, 41, 0, 14)
+                val.Font = Enum.Font.GothamSemibold
+                val.Text = minvalue
+                val.TextColor3 = themeList.TextColor
+                val.TextSize = 14.000
+                val.TextXAlignment = Enum.TextXAlignment.Right
+
+                updateSectionFrame()
+                UpdateSize()
+
+                local mouse = game.Players.LocalPlayer:GetMouse()
+                local uis = game:GetService("UserInputService")
+
+                sliderBtn.MouseButton1Down:Connect(function()
+                    local moveconnection, releaseconnection
+                    moveconnection = mouse.Move:Connect(function()
+                        local pos = math.clamp(mouse.X - sliderBtn.AbsolutePosition.X, 0, 149)
+                        local value = math.floor(((maxvalue - minvalue) / 149) * pos + minvalue)
+                        sliderDrag.Size = UDim2.new(0, pos, 1, 0)
+                        val.Text = value
+                        pcall(callback, value)
+                    end)
+                    releaseconnection = uis.InputEnded:Connect(function(mouseObj)
+                        if mouseObj.UserInputType == Enum.UserInputType.MouseButton1 then
+                            moveconnection:Disconnect()
+                            releaseconnection:Disconnect()
+                        end
+                    end)
+                end)
+
+                coroutine.wrap(function()
+                    while activeThreads and task.wait() do
+                        sliderElement.BackgroundColor3 = themeList.ElementColor
+                        togName.TextColor3 = themeList.TextColor
+                        sliderDrag.BackgroundColor3 = themeList.SchemeColor
+                        val.TextColor3 = themeList.TextColor
+                    end
+                end)()
+            end
+
+            function Elements:NewKeybind(keytext, keyinf, first, callback)
+                keytext = keytext or "Keybind"
+                callback = callback or function() end
+                local oldKey = first.Name
+
+                local keybindElement = Instance.new("TextButton")
+                local UICorner = Instance.new("UICorner")
+                local togName = Instance.new("TextLabel")
+                local keyName = Instance.new("TextLabel")
+
+                keybindElement.Name = "keybindElement"
+                keybindElement.Parent = sectionInners
+                keybindElement.BackgroundColor3 = themeList.ElementColor
+                keybindElement.Size = UDim2.new(0, 352, 0, 33)
+                keybindElement.AutoButtonColor = false
+                keybindElement.Text = ""
+
+                UICorner.CornerRadius = UDim.new(0, 4)
+                UICorner.Parent = keybindElement
+
+                togName.Name = "togName"
+                togName.Parent = keybindElement
+                togName.BackgroundTransparency = 1.000
+                togName.Position = UDim2.new(0.0967, 0, 0.272, 0)
+                togName.Size = UDim2.new(0, 222, 0, 14)
+                togName.Font = Enum.Font.GothamSemibold
+                togName.Text = keytext
+                togName.TextColor3 = themeList.TextColor
+                togName.TextSize = 14.000
+                togName.TextXAlignment = Enum.TextXAlignment.Left
+
+                keyName.Name = "keyName"
+                keyName.Parent = keybindElement
+                keyName.BackgroundTransparency = 1.000
+                keyName.Position = UDim2.new(0.727, 0, 0.272, 0)
+                keyName.Size = UDim2.new(0, 70, 0, 14)
+                keyName.Font = Enum.Font.GothamSemibold
+                keyName.Text = oldKey
+                keyName.TextColor3 = themeList.SchemeColor
+                keyName.TextSize = 14.000
+                keyName.TextXAlignment = Enum.TextXAlignment.Right
+
+                updateSectionFrame()
+                UpdateSize()
+
+                keybindElement.MouseButton1Click:Connect(function()
+                    keyName.Text = ". . ."
+                    local inputEvent = game:GetService("UserInputService").InputBegan:Wait()
+                    if inputEvent.KeyCode.Name ~= "Unknown" then
+                        oldKey = inputEvent.KeyCode.Name
+                        keyName.Text = oldKey
+                    end
+                end)
+
+                game:GetService("UserInputService").InputBegan:Connect(function(current, ok)
+                    if not ok and current.KeyCode.Name == oldKey then
+                        callback()
+                    end
+                end)
+
+                coroutine.wrap(function()
+                    while activeThreads and task.wait() do
+                        keybindElement.BackgroundColor3 = themeList.ElementColor
+                        togName.TextColor3 = themeList.TextColor
+                        keyName.TextColor3 = themeList.SchemeColor
+                    end
+                end)()
+            end
+
             return Elements
         end
         return Sections
